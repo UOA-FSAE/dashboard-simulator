@@ -2,9 +2,6 @@
 #include <lvgl.h>
 #include <vehicle.h>
 
-// Comment Out if in actual dash
-#define USE_SIMULATOR
-
 #ifndef USE_SIMULATOR
 #include <ltdc.h>
 #endif

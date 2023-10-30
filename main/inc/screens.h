@@ -2,6 +2,9 @@
 #ifndef INC_SCREENS_H_
 #define INC_SCREENS_H_
 
+// Comment Out if in actual dash
+#define USE_SIMULATOR
+
 enum SCREENS {
 	DRIVER_SCREEN,
 	DEBUG_SCREEN,
