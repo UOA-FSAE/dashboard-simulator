@@ -8,6 +8,8 @@ Using a PC simulator instead of an embedded hardware has several advantages:
 * **Collaborative** because any number of developers can work in the same environment
 * **Developer friendly** because much easier and faster to debug on PC
 
+This version was created specifically for using with the UoA FSAE Dashboard.  Please use it to develop GUI's without having to have it in the car.
+
 ## Requirements
 This project is configured for VSCode and only tested on Linux, although this may work on OSx or WSL. It requires a working version of GCC, GDB and make in your path.
 
@@ -22,7 +24,7 @@ To allow debugging inside VSCode you will also require a GDB [extension](https:/
 Clone the PC project and the related sub modules:
 
 ```bash
-git clone --recursive https://github.com/lvgl/lv_port_pc_vscode
+git clone --recursive https://github.com/UOA-FSAE/dashboard-simulator.git
 ```
 
 ### Install SDL
@@ -32,6 +34,15 @@ On on Linux you can install it via terminal:
 ```bash
 sudo apt-get update && sudo apt-get install -y build-essential libsdl2-dev
 ```
+
+### Using the simulator
+From the top level directory, just call 
+```
+make all -j
+```
+Then, run the binary created in `/build/bin` and it will launch a window with a preview of what the dashboard looks like.  The rest is up to you :)
+
+Make sure that the `screens.h`, `screens.c`, `vehicle.h` and `vehicle.c` are synced with the dashboard repository to make sure your changes tested on here are actually reflected on the real dashboard.  Also ensure that all fonts are copied into the `fonts` folder, and declared with `LV_LV_FONT_DECLARE(lower_case_font_variable_name)` to make them globally available.  This is also done in screens.  Only `screens.c` should be edited in this repository.
 
 ### Optional library
 There are also FreeType and FFmpeg support. You can install FreeType support with:
