@@ -24,6 +24,7 @@ void resetDataStructure(Vehicle_Data *input_data) {
     input_data->race.lapNumber = 0;
 
     input_data->race.bestLapTime = 0;
+    input_data->race.previousLapTime = 0;
     input_data->race.deltaLapTime = 0;
 
     input_data->race.vehicleState.GLV = false;

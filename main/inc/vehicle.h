@@ -82,6 +82,7 @@ typedef struct {
 typedef struct {
     uint32_t currentLapTime;    // 0 to 300,000 ms
     uint32_t bestLapTime;        // 0 to 300,000 ms
+    uint32_t previousLapTime;   // 0 to 300,000 ms
     int32_t deltaLapTime;        // -300,000 to 300,000 ms
     uint8_t currentSpeed;        // 0 to 255 kph
     uint8_t lapNumber;            // o to 255 laps

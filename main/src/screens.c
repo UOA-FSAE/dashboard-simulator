@@ -21,6 +21,7 @@ enum SCREENS current_screen;
 static volatile uint8_t screen_switch_flag = 0;
 static volatile uint8_t screen_update_flag = 0;
 
+#ifndef USE_SIMULATOR
 // Display Driver
 static lv_disp_draw_buf_t the_display_buf;
 static lv_disp_drv_t the_display_drv;                 /*A variable to hold the drivers.*/
@@ -35,7 +36,7 @@ volatile lv_color_t *buf_2 = (lv_color_t *)0xC0000000+272*480*4;
 volatile lv_color_t buf_1[100*100];
 volatile lv_color_t buf_2[100*100];
 #endif
-
+#endif
 ///////////
 // Fonts //
 ///////////
@@ -55,6 +56,8 @@ static lv_style_t text_box_style; // Text box style (for border)
 
 
 static lv_style_t regen_style;    // Regen Style
+
+static lv_style_t rpm_style;    // RPM style 
 
 /////////////
 // Objects //
@@ -98,6 +101,7 @@ lv_obj_t * power_mode_label;
 
 lv_obj_t * lap_screen;  //  Lap time screen objects
 
+lv_obj_t * lap_screen_rpm;
 lv_obj_t * current_lap_time;
 lv_obj_t * lap_delta;
 lv_obj_t * best_lap_time;
@@ -123,6 +127,13 @@ void init_screens() {
     lv_style_set_radius(&colored_label_style,5);
     lv_style_set_pad_all(&colored_label_style,10);
     lv_style_set_bg_opa(&colored_label_style,LV_OPA_COVER);
+
+    lv_style_init(&rpm_style);
+    lv_style_set_bg_opa(&rpm_style, LV_OPA_COVER);
+    lv_style_set_bg_color(&rpm_style, lv_palette_main(LV_PALETTE_BLUE));
+    lv_style_set_bg_grad_color(&rpm_style, lv_palette_main(LV_PALETTE_RED));
+    lv_style_set_bg_grad_dir(&rpm_style, LV_GRAD_DIR_HOR);
+    lv_style_set_radius(&rpm_style,3);
 
     //////////////////
     // Driver Screen//
@@ -325,8 +336,8 @@ void init_screens() {
     lv_obj_add_style(glv_power, &accumulator_style, LV_PART_INDICATOR);
     lv_obj_set_size(glv_power, 80, 140);
     lv_obj_align(glv_power, LV_ALIGN_CENTER, 70, 20);
-    lv_bar_set_range(glv_power, 0, 100);
-    lv_bar_set_value(glv_power, 60, LV_ANIM_OFF);
+    lv_bar_set_range(glv_power, 0, 294);
+    lv_bar_set_value(glv_power, 0, LV_ANIM_OFF);
 
     glv_text = lv_label_create(energy_screen);     // GLV Live Text
     lv_obj_align(glv_text, LV_ALIGN_CENTER, 70, 20);
@@ -365,6 +376,14 @@ void init_screens() {
     lv_style_set_outline_color(&text_box_style, lv_palette_main(LV_PALETTE_BLUE_GREY));
     lv_style_set_outline_pad(&text_box_style, 10);
 
+    lap_screen_rpm = lv_bar_create(lap_screen);  // Accumulator Bar
+    lv_obj_set_style_radius(lap_screen_rpm,6,LV_PART_MAIN);
+    lv_obj_add_style(lap_screen_rpm, &rpm_style, LV_PART_INDICATOR);
+    lv_obj_set_size(lap_screen_rpm, 262, 40);
+    lv_obj_align(lap_screen_rpm, LV_ALIGN_TOP_LEFT, 25, 10);
+    lv_bar_set_range(lap_screen_rpm, 0, 20000);
+    lv_bar_set_value(lap_screen_rpm, 0, LV_ANIM_OFF);
+
     current_lap_time = lv_label_create(lap_screen);    // Current lap time
     lv_obj_add_style(current_lap_time,&text_box_style,LV_PART_MAIN);
     lv_obj_set_style_text_font(current_lap_time,&bitstream_vera_sans_30,LV_PART_MAIN);
@@ -378,12 +397,13 @@ void init_screens() {
     lap_delta = lv_label_create(lap_screen);    // Lap Delta
     lv_obj_add_style(lap_delta,&text_box_style,LV_PART_MAIN);
     lv_obj_set_style_text_font(lap_delta,&bitstream_vera_sans_30,LV_PART_MAIN);
-    lv_label_set_text_fmt(lap_delta,"%.2f",the_vehicle.race.deltaLapTime/1000);
+    lv_label_set_text_fmt(lap_delta,"%.2f",the_vehicle.race.deltaLapTime/1000.0);
     lv_obj_align(lap_delta, LV_ALIGN_TOP_RIGHT,-40, 80);
 
     best_lap_time = lv_label_create(lap_screen);    // Best Lap Time
     lv_obj_add_style(best_lap_time,&text_box_style,LV_PART_MAIN);
     lv_obj_set_style_text_font(best_lap_time,&bitstream_vera_sans_26,LV_PART_MAIN);
+    lv_obj_set_style_text_color(best_lap_time,lv_palette_main(LV_PALETTE_PURPLE),LV_PART_MAIN);
 
     minutes = the_vehicle.race.bestLapTime/60000;
     seconds = the_vehicle.race.bestLapTime/1000-60*minutes;
@@ -394,7 +414,10 @@ void init_screens() {
     previous_lap_time = lv_label_create(lap_screen);    // Previous Lap Time
     lv_obj_add_style(previous_lap_time, &text_box_style, LV_PART_MAIN);
     lv_obj_set_style_text_font(previous_lap_time, &bitstream_vera_sans_26, LV_PART_MAIN);
-    lv_label_set_text(previous_lap_time, "01 : 08 : 473");  // TODO: Put previous lap time here
+    
+    minutes = the_vehicle.race.previousLapTime/60000;
+    seconds = the_vehicle.race.previousLapTime/1000-60*minutes;
+    lv_label_set_text_fmt(previous_lap_time,"%02d : %02d : %03d",minutes,seconds,the_vehicle.race.previousLapTime%1000);
 
     lv_obj_align(previous_lap_time, LV_ALIGN_TOP_LEFT, 40, 200);
 
@@ -407,10 +430,10 @@ void init_screens() {
     lap_label = lv_label_create(lap_screen);    // Laps Text
     lv_obj_set_style_text_font(lap_label,&lv_font_montserrat_18,LV_PART_MAIN);
     lv_label_set_text(lap_label,"laps");
-    lv_obj_align(lap_label, LV_ALIGN_TOP_RIGHT,-60, 198);
+    lv_obj_align(lap_label, LV_ALIGN_TOP_RIGHT,-45, 198);
 
-    lv_scr_load(driver_screen);
-    current_screen = DRIVER_SCREEN;
+    lv_scr_load(lap_screen);
+    current_screen = LAP_SCREEN;
 
 }
 
@@ -452,22 +475,34 @@ void try_update_screen() {
         lv_bar_set_value(regen_power, 0, LV_ANIM_OFF);  // TODO: CAN MESSAGE NEEDED
         lv_bar_set_value(accumulator_power, the_vehicle.ts.soc, LV_ANIM_OFF);
         lv_label_set_text_fmt(accumulator_text, "%d %%", the_vehicle.ts.soc);
-        lv_bar_set_value(glv_power, the_vehicle.glv.soc, LV_ANIM_OFF);
-        lv_label_set_text_fmt(glv_text, "%d %%", the_vehicle.glv.soc);
+        lv_bar_set_value(glv_power, (uint32_t)(the_vehicle.glv.voltage*10), LV_ANIM_OFF);
+        lv_label_set_text_fmt(glv_text, "%.1f %%", the_vehicle.glv.voltage);
         lv_bar_set_value(power_mode, 1, LV_ANIM_OFF);   // TODO: CAN MESSAGE NEEDED
     } else if (lv_scr_act() == lap_screen) {
-        uint32_t minutes = the_vehicle.race.currentLapTime/60000;
-        uint32_t seconds = the_vehicle.race.currentLapTime/1000-60*minutes;
-        lv_label_set_text_fmt(current_lap_time,"%02d : %02d : %03d",minutes,seconds,the_vehicle.race.currentLapTime%1000);
+        uint32_t minutes;
+        uint32_t seconds;
+        uint32_t milliseconds;
+
+        ms_to_minutes_seconds(the_vehicle.race.currentLapTime,&minutes,&seconds,&milliseconds);
+        lv_label_set_text_fmt(current_lap_time,"%02d : %02d : %03d",minutes,seconds,milliseconds);
 
         lv_label_set_text_fmt(lap_delta,"%.2f",the_vehicle.race.deltaLapTime/1000);
 
-        minutes = the_vehicle.race.bestLapTime/60000;
-        seconds = the_vehicle.race.bestLapTime/1000-60*minutes;
-        lv_label_set_text_fmt(best_lap_time,"%02d : %02d : %03d",minutes,seconds,the_vehicle.race.bestLapTime%1000);
+        ms_to_minutes_seconds(the_vehicle.race.bestLapTime,&minutes,&seconds,&milliseconds);
+        lv_label_set_text_fmt(best_lap_time,"%02d : %02d : %03d",minutes,seconds,milliseconds);
+
+        ms_to_minutes_seconds(the_vehicle.race.previousLapTime,&minutes,&seconds,&milliseconds);
+        lv_label_set_text_fmt(previous_lap_time,"%02d : %02d : %03d",minutes,seconds,milliseconds);
+
 
         lv_label_set_text_fmt(lap_number,"%02d ",the_vehicle.race.lapNumber);
     }
+}
+
+void ms_to_minutes_seconds(uint32_t ms, uint32_t * minutes, uint32_t * seconds, uint32_t * milliseconds) {
+    *minutes = the_vehicle.race.previousLapTime/60000;
+    *seconds = the_vehicle.race.previousLapTime/1000-60*(*minutes);
+    *milliseconds = ms%1000;
 }
 
 void update_screen() {

@@ -20,6 +20,7 @@
 // For the vehicle
 #include "screens.h"
 #include "vehicle.h"
+#include "handle_input.h"
 
 
 /*********************
@@ -81,6 +82,8 @@ int main(int argc, char **argv)
   (void)argc; /*Unused*/
   (void)argv; /*Unused*/
 
+  char line[256];
+
   /*Initialize LVGL*/
   lv_init();
 
@@ -96,6 +99,9 @@ int main(int argc, char **argv)
     update_screen();
     try_update_screen();
     usleep(5 * 1000);
+    the_vehicle.race.bestLapTime+=151;
+    the_vehicle.race.currentLapTime+=151;
+    the_vehicle.race.previousLapTime+=151;
   }
 
   return 0;
