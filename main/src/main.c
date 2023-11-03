@@ -27,10 +27,6 @@
  *      DEFINES
  *********************/
 
-LV_FONT_DECLARE(bitstream_vera_sans_26)
-LV_FONT_DECLARE(bitstream_vera_sans_30)
-LV_FONT_DECLARE(bitstream_vera_sans_80)
-
 /**********************
  *      TYPEDEFS
  **********************/
@@ -92,7 +88,7 @@ int main(int argc, char **argv)
 
   init_screens();
 
-  change_screens(DRIVER_SCREEN);
+  change_screens(LAP_SCREEN);
 
   while(1) {
     /* Periodically call the lv_task handler.
@@ -101,6 +97,9 @@ int main(int argc, char **argv)
     update_screen();
     try_update_screen();
     usleep(5 * 1000);
+    the_vehicle.race.currentLapTime+=1000;
+    the_vehicle.race.previousLapTime+=2000;
+    the_vehicle.race.bestLapTime+=3000;
   }
 
   return 0;
