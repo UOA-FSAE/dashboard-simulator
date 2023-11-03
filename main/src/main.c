@@ -100,8 +100,17 @@ int main(int argc, char **argv)
     the_vehicle.race.currentLapTime+=1000;
     the_vehicle.race.previousLapTime+=2000;
     the_vehicle.race.bestLapTime+=3000;
-  }
+    the_vehicle.driver.rpm=(the_vehicle.driver.rpm+100)%20000;
+    the_vehicle.race.deltaLapTime-=100;
+    the_vehicle.race.lapNumber=(the_vehicle.race.lapNumber+1)%100;
 
+    the_vehicle.driver.throttle=(the_vehicle.driver.throttle+2)%100;
+
+    the_vehicle.ts.soc=(the_vehicle.ts.soc+1)%100;
+    the_vehicle.glv.voltage = the_vehicle.glv.voltage+0.1;
+    if (the_vehicle.glv.voltage > 29.4) the_vehicle.glv.voltage = 22.0;
+
+  }
   return 0;
 }
 
@@ -147,7 +156,7 @@ static void hal_init(void)
 
   /* Add the mouse as input device
    * Use the 'mouse' driver which reads the PC's mouse*/
-  // mouse_init();
+//   mouse_init();
   static lv_indev_drv_t indev_drv_1;
   lv_indev_drv_init(&indev_drv_1); /*Basic initialization*/
   indev_drv_1.type = LV_INDEV_TYPE_POINTER;
