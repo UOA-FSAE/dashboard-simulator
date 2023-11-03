@@ -92,6 +92,8 @@ int main(int argc, char **argv)
 
   init_screens();
 
+  change_screens(DRIVER_SCREEN);
+
   while(1) {
     /* Periodically call the lv_task handler.
      * It could be done in a timer interrupt or an OS task too.*/
@@ -99,9 +101,6 @@ int main(int argc, char **argv)
     update_screen();
     try_update_screen();
     usleep(5 * 1000);
-    the_vehicle.race.bestLapTime+=151;
-    the_vehicle.race.currentLapTime+=151;
-    the_vehicle.race.previousLapTime+=151;
   }
 
   return 0;

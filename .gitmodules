@@ -4,3 +4,6 @@
 [submodule "lvgl"]
 	path = lvgl
 	url = https://github.com/lvgl/lvgl.git
+[submodule "dashboard"]
+	path = dashboard
+	url = https://github.com/UOA-FSAE/dashboard.git
