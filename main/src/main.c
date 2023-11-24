@@ -21,7 +21,7 @@
 #include "screens.h"
 #include "vehicle.h"
 #include "handle_input.h"
-
+#include "popups.h"
 
 /*********************
  *      DEFINES
@@ -86,9 +86,42 @@ int main(int argc, char **argv)
   /*Initialize the HAL (display, input devices, tick) for LVGL*/
   hal_init();
 
+    the_vehicle.race.currentLapTime = 5630;
+    the_vehicle.race.previousLapTime+=6892;
+    the_vehicle.race.bestLapTime+=4711;
+    the_vehicle.driver.rpm=15700;
+    the_vehicle.race.deltaLapTime=-1262;
+    the_vehicle.race.lapNumber=9;
+
+    the_vehicle.driver.throttle=66;
+
+    the_vehicle.ts.soc = 67;
+    the_vehicle.glv.voltage = 27.8;
+    the_vehicle.driver.steeringAngle = 88;
+    the_vehicle.driver.frontBrakePressure = 22;
+    the_vehicle.driver.rearBrakePressure = 23;
+    the_vehicle.ts.minVoltage = 3.62f;
+    the_vehicle.ts.maxVoltage = 3.67f;
+
+    the_vehicle.drive[0].motorTemp = 51;
+    the_vehicle.drive[0].inverterTemp = 39;
+    the_vehicle.drive[1].motorTemp = 55;
+    the_vehicle.drive[1].inverterTemp = 41;
+    the_vehicle.drive[2].motorTemp = 54;
+    the_vehicle.drive[2].inverterTemp = 42;
+    the_vehicle.drive[3].motorTemp = 78;
+    the_vehicle.drive[3].inverterTemp = 60;
+    the_vehicle.drive[3].errorCode = 1;
+
+    the_vehicle.ts.soc=(the_vehicle.ts.soc+1)%100;
+    the_vehicle.glv.voltage = the_vehicle.glv.voltage+0.1;
+    if (the_vehicle.glv.voltage > 29.4) the_vehicle.glv.voltage = 22.0;
+
   init_screens();
 
   change_screens(LAP_SCREEN);
+
+  int counter = 0;
 
   while(1) {
     /* Periodically call the lv_task handler.
@@ -96,19 +129,30 @@ int main(int argc, char **argv)
     lv_timer_handler();
     update_screen();
     try_update_screen();
+    try_enable_popups();
+//    try_disable_popups();
     usleep(5 * 1000);
-    the_vehicle.race.currentLapTime+=1000;
-    the_vehicle.race.previousLapTime+=2000;
-    the_vehicle.race.bestLapTime+=3000;
-    the_vehicle.driver.rpm=(the_vehicle.driver.rpm+100)%20000;
-    the_vehicle.race.deltaLapTime-=100;
-    the_vehicle.race.lapNumber=(the_vehicle.race.lapNumber+1)%100;
+    counter++;
 
-    the_vehicle.driver.throttle=(the_vehicle.driver.throttle+2)%100;
+    if (counter%200 == 100) {
+        enable_popups();
+    }
+    if (counter%200 == 0) {
+        disable_popups();
+    }
 
-    the_vehicle.ts.soc=(the_vehicle.ts.soc+1)%100;
-    the_vehicle.glv.voltage = the_vehicle.glv.voltage+0.1;
-    if (the_vehicle.glv.voltage > 29.4) the_vehicle.glv.voltage = 22.0;
+//    the_vehicle.race.currentLapTime+=1000;
+//    the_vehicle.race.previousLapTime+=2000;
+//    the_vehicle.race.bestLapTime+=3000;
+//    the_vehicle.driver.rpm=(the_vehicle.driver.rpm+100)%20000;
+//    the_vehicle.race.deltaLapTime-=100;
+//    the_vehicle.race.lapNumber=(the_vehicle.race.lapNumber+1)%100;
+//
+//    the_vehicle.driver.throttle=(the_vehicle.driver.throttle+2)%100;
+//
+//    the_vehicle.ts.soc=(the_vehicle.ts.soc+1)%100;
+//    the_vehicle.glv.voltage = the_vehicle.glv.voltage+0.1;
+//    if (the_vehicle.glv.voltage > 29.4) the_vehicle.glv.voltage = 22.0;
 
   }
   return 0;
