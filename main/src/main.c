@@ -113,13 +113,15 @@ int main(int argc, char **argv)
     the_vehicle.drive[3].inverterTemp = 60;
     the_vehicle.drive[3].errorCode = 1;
 
+    the_vehicle.errors.PDOC = true;
+
     the_vehicle.ts.soc=(the_vehicle.ts.soc+1)%100;
     the_vehicle.glv.voltage = the_vehicle.glv.voltage+0.1;
     if (the_vehicle.glv.voltage > 29.4) the_vehicle.glv.voltage = 22.0;
 
   init_screens();
 
-  change_screens(LAP_SCREEN);
+  change_screens(ERROR_SCREEN);
 
   int counter = 0;
 
@@ -127,18 +129,15 @@ int main(int argc, char **argv)
     /* Periodically call the lv_task handler.
      * It could be done in a timer interrupt or an OS task too.*/
     lv_timer_handler();
-    update_screen();
     try_update_screen();
-    try_enable_popups();
+//    try_enable_popups();
 //    try_disable_popups();
+    update_screen();
     usleep(5 * 1000);
     counter++;
 
     if (counter%200 == 100) {
-        enable_popups();
-    }
-    if (counter%200 == 0) {
-        disable_popups();
+        cycle_screens();
     }
 
 //    the_vehicle.race.currentLapTime+=1000;
