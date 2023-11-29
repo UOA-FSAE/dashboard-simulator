@@ -121,7 +121,7 @@ int main(int argc, char **argv)
 
   init_screens();
 
-  change_screens(ERROR_SCREEN);
+  change_screens(DEBUG_SCREEN);
 
   int counter = 0;
 
