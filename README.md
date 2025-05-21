@@ -1,17 +1,11 @@
 # Simulator project for LVGL embedded GUI Library
 
-The [LVGL](https://github.com/lvgl/lvgl) is written mainly for microcontrollers and embedded systems however you can run the library **on your PC** as well without any embedded hardware. The code written on PC can be simply copied when your are using an embedded system.
+The [LVGL](https://github.com/lvgl/lvgl) is the embedded graphics library that we use on the dashboard. To aid in screen development we can simulate the screen running on a pc, then you can port (copy) over the screen files to the [dashboard](https://github.com/UOA-FSAE/dashboard).
 
-Using a PC simulator instead of an embedded hardware has several advantages:
-* **Costs $0** because you don't have to buy or design PCB
-* **Fast** because you don't have to design and manufacture PCB
-* **Collaborative** because any number of developers can work in the same environment
-* **Developer friendly** because much easier and faster to debug on PC
-
-This version was created specifically for using with the UoA FSAE Dashboard.  Please use it to develop GUI's without having to have it in the car.
+![simulator](resources/simulation.png?raw=true)
 
 ## Requirements
-This project is configured for VSCode and only tested on Linux, although this may work on OSx or WSL. It requires a working version of GCC, GDB and make in your path.
+This project "is configured"/only ran so far on VSCode and Linux, if you are on Windows, WSL works fine. It requires a working version of GCC, GDB and make in your path.
 
 To allow debugging inside VSCode you will also require a GDB [extension](https://marketplace.visualstudio.com/items?itemName=webfreak.debug) or other suitable debugger.
 
@@ -30,7 +24,7 @@ git clone --recursive https://github.com/UOA-FSAE/dashboard-simulator.git
 ### Install SDL
 You can download SDL from https://www.libsdl.org/
 
-On on Linux you can install it via terminal:
+On Linux (ubuntu/deb) you can install it via terminal:
 ```bash
 sudo apt-get update && sudo apt-get install -y build-essential libsdl2-dev
 ```
@@ -38,11 +32,15 @@ sudo apt-get update && sudo apt-get install -y build-essential libsdl2-dev
 ### Using the simulator
 From the top level directory, just call 
 ```
-make all -j
+make all -j && ./build/bin/demo
 ```
-Then, run the binary created in `/build/bin` and it will launch a window with a preview of what the dashboard looks like.  The rest is up to you :)
+- make -j: Compiles the project (the -j flag enables parallel compilation, speeding it up).
+- ./build/bin/demo: Runs the compiled simulator application.
+You should see the LVGL demo application running in a new window.
 
-Make sure that the `screens.h`, `screens.c`, `vehicle.h` and `vehicle.c` are synced with the dashboard repository to make sure your changes tested on here are actually reflected on the real dashboard.  Also ensure that all fonts are copied into the `fonts` folder, and declared with `LV_LV_FONT_DECLARE(lower_case_font_variable_name)` to make them globally available.  This is also done in screens.  Only `screens.c` should be edited in this repository.
+Make sure that the `screens.h`, `screens.c`, `vehicle.h` and `vehicle.c` are synced with the dashboard repository (submodule) to make sure your changes tested on here are actually reflected on the real dashboard.
+
+When using **fonts** you want to use are copied into the `fonts` folder, and declared with `LV_LV_FONT_DECLARE(lower_case_font_variable_name)` in `styles.h`, and `screens.c` to make them globally available.
 
 ### Optional library
 There are also FreeType and FFmpeg support. You can install FreeType support with:
